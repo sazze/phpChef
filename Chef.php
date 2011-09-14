@@ -9,7 +9,7 @@
  *
  * @package framework.php
  * @author Daniel Aharon <daharon@sazze.com>
- * @license http://www.gnu.org/licenses/gpl-2.0.txt  GPLv2
+ * @license http://www.gnu.org/licenses/lgpl.html  LGPL
  * @copyright 2011 Sazze, Inc.
  */
 
