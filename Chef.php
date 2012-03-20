@@ -429,8 +429,8 @@ namespace chef {
 
             $headers = array(
                 'X-Ops-Sign' => 'version=1.0',
-                'X-Ops-Userid' => $userId,
-                'X-Ops-TimeStamp' => $timestamp,
+                'X-Ops-UserId' => $userId,
+                'X-Ops-Timestamp' => $timestamp,
                 'X-Ops-Content-Hash' => $hashedBody
             );
 
