@@ -228,6 +228,19 @@ namespace chef {
         }
 
         /**
+         * Chef::deleteDataBagItem()
+         *
+         * @param string $dataBagName The name of the data bag containing the item.
+         * @param string $itemName The name of the data bag item.
+         *
+         * @return array The contents of the data bag item.
+         */
+        public function deleteDataBagItem($dataBagName, $itemName) {
+            $uri = '/data/' . $dataBagName . '/' . $itemName;
+            return $this->httpDelete($uri);
+        }
+
+        /**
          * Chef::getDataBagItem()
          *
          * Get the contents of a data bag item.
@@ -240,6 +253,64 @@ namespace chef {
         public function getDataBagItem($dataBagName, $itemName) {
             $uri = '/data/' . $dataBagName . '/' . $itemName;
             return $this->httpGet($uri);
+        }
+        
+        /**
+         * Chef::postDataBagItem()
+         *
+         * Creates a data bag item.
+         *
+         * @param string $dataBagName The name of the data bag containing the item.
+         * @param array $itemContents The JSON formatted contents of the data bag item. Must contain an "id" field.
+         *
+         * @return array Response code
+         */
+        public function postDataBagItem($dataBagName, $itemContents) {
+            $uri = '/data/'. $dataBagName;
+            return $this->httpPost($uri, $itemContents);
+        }
+
+        /**
+         * Chef::putDataBagItem()
+         *
+         * Updates the contents of a data bag item.
+         *
+         * @param string $dataBagName The name of the data bag containing the item.
+         * @param string $itemID The ID of the data bag item.
+         * @param array $itemContents The contents of the data bag item.
+         *
+         * @return array The contents of the data bag item.
+         */
+        public function putDataBagItem($dataBagName, $itemID, $itemContents) {
+            $uri = '/data/'. $dataBagName . '/' . $itemID;
+            return $this->httpPut($uri, $itemContents);
+        }
+
+        /**
+         * Chef::httpDelete()
+         *
+         * Perform a DELETE request to the Chef server.
+         *
+         * @param string $uri The request URI.
+         * @param string $queryString The query string.
+         *
+         * @return array An associative array generated from the JSON response.
+         */
+        private function httpDelete($uri) {
+            $headers = $this->requestHeaders($uri, 'DELETE', '', $this->userId, $this->privateKey);
+            $headers['X-Chef-Version'] = $this->version;
+            $headers['Accept'] = 'application/json';
+
+            $request = new \HttpRequest(
+                'http://' . $this->host . ':' . $this->port . $uri,
+                HTTP_METH_DELETE,
+                array(
+                    'headers' => $headers
+                )
+            );
+
+            $response = $request->send();
+            return json_decode($response->getBody(), true);
         }
 
         /**
@@ -271,6 +342,69 @@ namespace chef {
             );
 
             $response = $request->send();
+            return json_decode($response->getBody(), true);
+        }
+
+        /**
+         * Chef::httpPut()
+         *
+         * Perform a PUT request to the Chef server.
+         *
+         * @param string $uri The request URI.
+         * @param string $queryString The query string.
+         * @param array $requestBody A JSON object
+         *
+         * @return array An associative array generated from the JSON response.
+         */
+        private function httpPut($uri, $requestBody) {
+
+            $headers['X-Chef-Version'] = $this->version;
+            $headers = $this->requestHeaders($uri, 'PUT', $requestBody, $this->userId, $this->privateKey);
+            $headers['Accept'] = 'application/json';
+
+            $request = new \HttpRequest(
+                'http://' . $this->host . ':' . $this->port . $uri,
+                HTTP_METH_PUT,
+                array(
+                    'headers' => $headers
+                )
+            );
+            $request->setContentType('application/json');
+            $request->addPutData($requestBody);
+
+            $response = $request->send();
+
+            return json_decode($response->getBody(), true);
+        }
+
+        /**
+         * Chef::httpPost()
+         *
+         * Perform a POST request to the Chef server.
+         *
+         * @param string $uri The request URI.
+         * @param array $requestBody A JSON object
+         *
+         * @return array An associative array generated from the JSON response.
+         */
+        private function httpPost($uri, $requestBody) {
+
+            $headers['X-Chef-Version'] = $this->version;
+            $headers = $this->requestHeaders($uri, 'POST', $requestBody, $this->userId, $this->privateKey);
+            $headers['Accept'] = 'application/json';
+
+            $request = new \HttpRequest(
+                'http://' . $this->host . ':' . $this->port . $uri,
+                HTTP_METH_POST,
+                array(
+                    'headers' => $headers
+                )
+            );
+            $request->setContentType('application/json');
+            $request->addBody($requestBody);
+            
+            $response = $request->send();
+
             return json_decode($response->getBody(), true);
         }
 
