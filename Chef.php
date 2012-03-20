@@ -228,18 +228,91 @@ namespace chef {
         }
 
         /**
-         * Chef::getDataBagItem()
+         * Chef::deleteDataBagItem()
          *
-         * Get the contents of a data bag item.
+         * Delete a data bag item.
          *
          * @param string $dataBagName The name of the data bag containing the item.
          * @param string $itemName The name of the data bag item.
          *
          * @return array The contents of the data bag item.
          */
-        public function getDataBagItem($dataBagName, $itemName) {
+        public function deleteDataBagItem($dataBagName, $itemName) {
             $uri = '/data/' . $dataBagName . '/' . $itemName;
+            return $this->httpDelete($uri);
+        }
+
+        /**
+         * Chef::getDataBagItem()
+         *
+         * Get the contents of a data bag item.
+         *
+         * @param string $dataBagName The name of the data bag containing the item.
+         * @param string $itemID The ID of the data bag item.
+         *
+         * @return array The contents of the data bag item.
+         */
+        public function getDataBagItem($dataBagName, $itemID) {
+            $uri = '/data/' . $dataBagName . '/' . $itemID;
             return $this->httpGet($uri);
+        }
+        
+        /**
+         * Chef::postDataBagItem()
+         *
+         * Creates a data bag item.
+         *
+         * @param string $dataBagName The name of the data bag containing the item.
+         * @param array $itemContents The JSON formatted contents of the data bag item. Must contain an "id" field.
+         *
+         * @return array Response code
+         */
+        public function postDataBagItem($dataBagName, $itemContents) {
+            $uri = '/data/'. $dataBagName;
+            return $this->httpPost($uri, $itemContents);
+        }
+
+        /**
+         * Chef::putDataBagItem()
+         *
+         * Updates the contents of a data bag item.
+         *
+         * @param string $dataBagName The name of the data bag containing the item.
+         * @param string $itemID The ID of the data bag item.
+         * @param array $itemContents The contents of the data bag item.
+         *
+         * @return array The contents of the data bag item.
+         */
+        public function putDataBagItem($dataBagName, $itemID, $itemContents) {
+            $uri = '/data/'. $dataBagName . '/' . $itemID;
+            return $this->httpPut($uri, $itemContents);
+        }
+
+        /**
+         * Chef::httpDelete()
+         *
+         * Perform a DELETE request to the Chef server.
+         *
+         * @param string $uri The request URI.
+         * @param string $queryString The query string.
+         *
+         * @return array An associative array generated from the JSON response.
+         */
+        private function httpDelete($uri) {
+            $headers = $this->requestHeaders($uri, 'DELETE', '', $this->userId, $this->privateKey);
+            $headers['X-Chef-Version'] = $this->version;
+            $headers['Accept'] = 'application/json';
+
+            $request = new \HttpRequest(
+                'http://' . $this->host . ':' . $this->port . $uri,
+                HTTP_METH_DELETE,
+                array(
+                    'headers' => $headers
+                )
+            );
+
+            $response = $request->send();
+            return json_decode($response->getBody(), true);
         }
 
         /**
@@ -275,6 +348,69 @@ namespace chef {
         }
 
         /**
+         * Chef::httpPut()
+         *
+         * Perform a PUT request to the Chef server.
+         *
+         * @param string $uri The request URI.
+         * @param string $queryString The query string.
+         * @param array $requestBody A JSON object
+         *
+         * @return array An associative array generated from the JSON response.
+         */
+        private function httpPut($uri, $requestBody) {
+
+            $headers['X-Chef-Version'] = $this->version;
+            $headers = $this->requestHeaders($uri, 'PUT', $requestBody, $this->userId, $this->privateKey);
+            $headers['Accept'] = 'application/json';
+
+            $request = new \HttpRequest(
+                'http://' . $this->host . ':' . $this->port . $uri,
+                HTTP_METH_PUT,
+                array(
+                    'headers' => $headers
+                )
+            );
+            $request->setContentType('application/json');
+            $request->addPutData($requestBody);
+
+            $response = $request->send();
+
+            return json_decode($response->getBody(), true);
+        }
+
+        /**
+         * Chef::httpPost()
+         *
+         * Perform a POST request to the Chef server.
+         *
+         * @param string $uri The request URI.
+         * @param array $requestBody A JSON object
+         *
+         * @return array An associative array generated from the JSON response.
+         */
+        private function httpPost($uri, $requestBody) {
+
+            $headers['X-Chef-Version'] = $this->version;
+            $headers = $this->requestHeaders($uri, 'POST', $requestBody, $this->userId, $this->privateKey);
+            $headers['Accept'] = 'application/json';
+
+            $request = new \HttpRequest(
+                'http://' . $this->host . ':' . $this->port . $uri,
+                HTTP_METH_POST,
+                array(
+                    'headers' => $headers
+                )
+            );
+            $request->setContentType('application/json');
+            $request->addBody($requestBody);
+            
+            $response = $request->send();
+
+            return json_decode($response->getBody(), true);
+        }
+
+        /**
          * Chef::requestHeaders()
          *
          * Generate the encrypted header entries for the Chef request.
@@ -295,8 +431,8 @@ namespace chef {
 
             $headers = array(
                 'X-Ops-Sign' => 'version=1.0',
-                'X-Ops-Userid' => $userId,
-                'X-Ops-TimeStamp' => $timestamp,
+                'X-Ops-UserId' => $userId,
+                'X-Ops-Timestamp' => $timestamp,
                 'X-Ops-Content-Hash' => $hashedBody
             );
 
