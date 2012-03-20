@@ -230,6 +230,8 @@ namespace chef {
         /**
          * Chef::deleteDataBagItem()
          *
+         * Delete a data bag item.
+         *
          * @param string $dataBagName The name of the data bag containing the item.
          * @param string $itemName The name of the data bag item.
          *
