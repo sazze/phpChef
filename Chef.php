@@ -248,12 +248,12 @@ namespace chef {
          * Get the contents of a data bag item.
          *
          * @param string $dataBagName The name of the data bag containing the item.
-         * @param string $itemName The name of the data bag item.
+         * @param string $itemID The ID of the data bag item.
          *
          * @return array The contents of the data bag item.
          */
-        public function getDataBagItem($dataBagName, $itemName) {
-            $uri = '/data/' . $dataBagName . '/' . $itemName;
+        public function getDataBagItem($dataBagName, $itemID) {
+            $uri = '/data/' . $dataBagName . '/' . $itemID;
             return $this->httpGet($uri);
         }
         
