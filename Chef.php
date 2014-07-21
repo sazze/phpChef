@@ -55,8 +55,8 @@ namespace chef {
          *
          * @param string $hostname FQDN or IP address of the Chef server.
          * @param integer $port The port that the Chef server is listening on.
-         * @param string $privateKey Either the key itself, or the filename containing the key.
          * @param string $userId The client name associated with the private key.
+         * @param string $privateKey Either the key itself, or the filename containing the key.
          * @param string $chefVersion The Chef server version.
          *
          * @return Chef An instance of the Chef class.
