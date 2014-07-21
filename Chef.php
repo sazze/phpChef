@@ -61,8 +61,8 @@ namespace chef {
          *
          * @return Chef An instance of the Chef class.
          */
-        public static function factory($hostname, $port, $privateKey, $userId, $chefVersion = '0.9.12') {
-            return new static($hostname, $port, $privateKey, $userId, $chefVersion);
+        public static function factory($hostname, $port, $userId, $privateKey, $chefVersion = '0.9.12') {
+            return new static($hostname, $port, $userId, $privateKey, $chefVersion);
         }
 
         /**
@@ -256,7 +256,7 @@ namespace chef {
             $uri = '/data/' . $dataBagName . '/' . $itemID;
             return $this->httpGet($uri);
         }
-        
+
         /**
          * Chef::postDataBagItem()
          *
@@ -304,7 +304,7 @@ namespace chef {
             $headers['Accept'] = 'application/json';
 
             $request = new \HttpRequest(
-                'http://' . $this->host . ':' . $this->port . $uri,
+                'http' . ($this->port === 443 ? 's' : '') . '://'. $this->host . ':' . $this->port . $uri,
                 HTTP_METH_DELETE,
                 array(
                     'headers' => $headers
@@ -336,7 +336,7 @@ namespace chef {
             }
 
             $request = new \HttpRequest(
-                'http://' . $this->host . ':' . $this->port . $uri,
+                'http' . ($this->port === 443 ? 's' : '') . '://' . $this->host . ':' . $this->port . $uri,
                 HTTP_METH_GET,
                 array(
                     'headers' => $headers
@@ -365,7 +365,7 @@ namespace chef {
             $headers['Accept'] = 'application/json';
 
             $request = new \HttpRequest(
-                'http://' . $this->host . ':' . $this->port . $uri,
+                'http' . ($this->port === 443 ? 's' : '') . '://' . $this->host . ':' . $this->port . $uri,
                 HTTP_METH_PUT,
                 array(
                     'headers' => $headers
@@ -396,7 +396,7 @@ namespace chef {
             $headers['Accept'] = 'application/json';
 
             $request = new \HttpRequest(
-                'http://' . $this->host . ':' . $this->port . $uri,
+                'http' . ($this->port === 443 ? 's' : '') . '://' . $this->host . ':' . $this->port . $uri,
                 HTTP_METH_POST,
                 array(
                     'headers' => $headers
@@ -404,7 +404,7 @@ namespace chef {
             );
             $request->setContentType('application/json');
             $request->addBody($requestBody);
-            
+
             $response = $request->send();
 
             return json_decode($response->getBody(), true);
